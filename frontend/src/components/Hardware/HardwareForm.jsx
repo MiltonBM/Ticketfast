@@ -44,6 +44,8 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
         gpu_type: '',
         screen_size: '',
         screen_resolution: '',
+        keyboard_type: '',
+        mouse_type: '',
         projector_lumens: '',
         projector_resolution: '',
         projector_contrast: '',
@@ -138,6 +140,9 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
         gpuModels: ['GeForce RTX 4090', 'GeForce RTX 4080', 'GeForce RTX 4070', 'GeForce RTX 4060', 'GeForce RTX 3050', 'GeForce GTX 1660', 'Quadro', 'Tesla', 'Radeon RX 7900 XTX', 'Radeon RX 7900 XT', 'Radeon RX 7800 XT', 'Radeon RX 7600', 'Radeon Pro', 'Instinct', 'Arc A770', 'Arc A750', 'Arc A580'],
         gpuMemories: ['2GB', '4GB', '6GB', '8GB', '10GB', '12GB', '16GB', '20GB', '24GB', '32GB', '48GB'],
         gpuTypes: ['Integrada', 'Externa', 'Dedicada', 'Discreta'],
+
+        keyboardTypes: ['Membrana', 'Mecánico', 'Táctil (Laptop)', 'Ergonómico', 'Inalámbrico', 'USB', 'PS/2', 'Bluetooth', 'Retroiluminado'],
+        mouseTypes: ['Óptico', 'Láser', 'Trackball', 'Trackpad (Laptop)', 'Inalámbrico', 'USB', 'PS/2', 'Bluetooth', 'Ergonómico'],
         
         monitorSizes: ['17"', '19"', '21.5"', '22"', '24"', '27"', '28"', '29"', '30"', '32"', '34"', '38"', '40"', '43"', '49"', '55"'],
         resolutions: ['1920x1080 (Full HD)', '2560x1440 (2K)', '3840x2160 (4K)', '1280x720 (HD)', '800x600 (SVGA)', '1024x768 (XGA)', '1280x800 (WXGA)'],
@@ -332,8 +337,7 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
             <div style={{ marginTop: '20px', padding: '16px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                 <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#1B2A4A', marginBottom: '16px', borderBottom: '2px solid #D4A843', paddingBottom: '8px' }}>
                     🖥️ Tarjeta Madre
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                </h4>                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
                     {renderSelect('Marca', 'motherboard_brand', formData.motherboard_brand, options.motherboardBrands)}
                     {renderSelect('Modelo', 'motherboard_model', formData.motherboard_model, options.motherboardModels)}
                     {renderInput('Serial', 'motherboard_serial', formData.motherboard_serial, 'Serial de la tarjeta madre')}
@@ -392,6 +396,16 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
                     {renderSelect('Modelo', 'gpu_capacity', formData.gpu_capacity, options.gpuModels)}
                     {renderSelect('Memoria', 'gpu_memory', formData.gpu_memory, options.gpuMemories)}
                     {renderSelect('Tipo', 'gpu_type', formData.gpu_type, options.gpuTypes)}
+                </div>
+            </div>
+
+            <div style={{ marginTop: '20px', padding: '16px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#1B2A4A', marginBottom: '16px', borderBottom: '2px solid #D4A843', paddingBottom: '8px' }}>
+                    ⌨️ Periféricos
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                    {renderSelect('Tipo de Teclado', 'keyboard_type', formData.keyboard_type, options.keyboardTypes)}
+                    {renderSelect('Tipo de Mouse', 'mouse_type', formData.mouse_type, options.mouseTypes)}
                 </div>
             </div>
         </>
@@ -502,8 +516,7 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
             <form onSubmit={handleSubmit}>
                 {/* Tipo de Equipo y Estado */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                    {renderSelect('Tipo de Equipo', 'device_type', formData.device_type, options.deviceTypes)}
-                    {renderSelect('Estado', 'status', formData.status, ['Operativo', 'En Mantenimiento', 'Retirado'])}
+                    {renderSelect('Tipo de Equipo', 'device_type', formData.device_type, options.deviceTypes)}                    {renderSelect('Estado', 'status', formData.status, ['Operativo', 'En Mantenimiento', 'Retirado'])}
                 </div>
 
                 {/* Mensaje para técnicos */}

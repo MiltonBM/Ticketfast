@@ -265,3 +265,7 @@ CREATE TABLE IF NOT EXISTS ticket_audit (
 );
 -- Agregar campo para guardar el estado anterior
 ALTER TABLE tickets ADD COLUMN previous_status TEXT DEFAULT 'pending';
+
+-- Agregar campos de periféricos (Teclado y Mouse) al expediente de hardware
+ALTER TABLE hardware ADD COLUMN keyboard_type TEXT;
+ALTER TABLE hardware ADD COLUMN mouse_type TEXT;

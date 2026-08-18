@@ -134,7 +134,8 @@ router.post("/", async (req, res) => {
             'ram_brand', 'ram_family', 'ram_speed', 'ram_modules', 'ram_total_capacity',
             'hdd_brand', 'hdd_model', 'hdd_speed', 'hdd_capacity', 'hdd_type',
             'gpu_brand', 'gpu_memory', 'gpu_capacity', 'gpu_type',
-            'screen_size', 'screen_resolution'
+            'screen_size', 'screen_resolution',
+            'keyboard_type', 'mouse_type'
         ];
 
         const projectorFields = [

@@ -77,7 +77,7 @@ const HardwareList = ({ onStatsUpdate }) => {
             return;
         }
 
-        const headers = 'Serial,Tipo,Marca,Modelo,Procesador,RAM,Disco,GPU,Estado,Asignado,Fecha';
+        const headers = 'Serial,Tipo,Marca,Modelo,Procesador,RAM,Disco,GPU,Teclado,Mouse,Estado,Asignado,Fecha';
         const rows = hardware.map(h => {
             const assignedTo = h.assigned_user_name || h.assigned_lab_name || 'No asignado';
             const statusMap = { operative: 'Operativo', maintenance: 'En Mantenimiento', retired: 'Retirado' };
@@ -90,6 +90,8 @@ const HardwareList = ({ onStatsUpdate }) => {
                 `${h.ram_modules || 0}x ${h.ram_brand || ''} ${h.ram_speed || ''}`.trim() || 'N/A',
                 `${h.hdd_type || ''} ${h.hdd_capacity || ''}`.trim() || 'N/A',
                 `${h.gpu_brand || ''} ${h.gpu_memory || ''}`.trim() || 'N/A',
+                h.keyboard_type || 'N/A',
+                h.mouse_type || 'N/A',
                 statusMap[h.status] || h.status || 'Operativo',
                 assignedTo,
                 new Date(h.created_at).toLocaleDateString()
@@ -162,7 +164,9 @@ const HardwareList = ({ onStatsUpdate }) => {
             item.assigned_user_name,
             item.assigned_lab_name,
             item.processor_brand,
-            item.processor_model
+            item.processor_model,
+            item.keyboard_type,
+            item.mouse_type
         ];
         const matchesSearch = searchFields.some(field => 
             field && field.toString().toLowerCase().includes(term)
@@ -263,8 +267,7 @@ const HardwareList = ({ onStatsUpdate }) => {
                             <div style={{ 
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
-                                alignItems: 'flex-start',
-                                borderBottom: '2px solid #f0f0f0',
+                                alignItems: 'flex-start',                                borderBottom: '2px solid #f0f0f0',
                                 paddingBottom: '10px'
                             }}>
                                 <div>
@@ -342,6 +345,19 @@ const HardwareList = ({ onStatsUpdate }) => {
                                     </div>
                                 )}
 
+                                {(item.keyboard_type || item.mouse_type) && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Periféricos:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.keyboard_type ? `Teclado: ${item.keyboard_type}` : ''}
+                                            {item.keyboard_type && item.mouse_type ? ' · ' : ''}
+                                            {item.mouse_type ? `Mouse: ${item.mouse_type}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
                                 {/* Asignación y acciones */}
                                 <div style={{ 
                                     marginTop: '8px',
@@ -380,8 +396,7 @@ const HardwareList = ({ onStatsUpdate }) => {
                                             style={{ padding: '4px 12px', fontSize: '11px' }}
                                         >
                                             🗑️
-                                        </button>
-                                    </div>
+                                        </button>                                    </div>
                                 </div>
                             </div>
                         </div>
