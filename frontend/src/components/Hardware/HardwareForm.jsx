@@ -246,6 +246,12 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.purchase_date && formData.warranty_until && formData.warranty_until < formData.purchase_date) {
+            toast.error('❌ La garantía no puede vencer antes de la fecha de compra');
+            return;
+        }
+
         try {
             const submitData = { ...formData };
             const statusReverseMap = {
@@ -300,12 +306,12 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
         </div>
     );
 
-    const renderDateInput = (label, name, value) => (
+        const renderDateInput = (label, name, value, min, max) => (
         <div style={{ marginBottom: '12px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#1B2A4A', marginBottom: '4px' }}>
                 {label}
             </label>
-            <input type="date" name={name} value={value || ''} onChange={handleChange} className="input-premium" />
+            <input type="date" name={name} value={value || ''} onChange={handleChange} min={min} max={max} className="input-premium" />
         </div>
     );
 
@@ -655,8 +661,8 @@ const HardwareForm = ({ onHardwareCreated, editingHardware, userRole }) => {
                         {renderInput('Código de Inventario', 'inventory_code', formData.inventory_code, 'Código interno de inventario')}
                         {renderSelect('Marca', 'brand', formData.brand, options.brands)}
                         {renderSelect('Modelo', 'model', formData.model, options.models)}
-                        {renderDateInput('Fecha de Compra', 'purchase_date', formData.purchase_date)}
-                        {renderDateInput('Garantía hasta', 'warranty_until', formData.warranty_until)}
+                        {renderDateInput('Fecha de Compra', 'purchase_date', formData.purchase_date, undefined, new Date().toISOString().slice(0, 10))}
+                        {renderDateInput('Garantía hasta', 'warranty_until', formData.warranty_until, formData.purchase_date || undefined, undefined)}
                     </div>
                     <div style={{ marginTop: '12px' }}>
                         {renderInput('Observaciones', 'observations', formData.observations, 'Notas adicionales sobre el equipo')}
