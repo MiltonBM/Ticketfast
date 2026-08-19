@@ -8,6 +8,7 @@ const TicketForm = ({ onTicketCreated }) => {
     const [formData, setFormData] = useState({
         user_name: '',
         user_department: '',
+        user_department_id: '',
         user_phone: '',
         user_email: '',
         computer_model: '',
@@ -17,11 +18,55 @@ const TicketForm = ({ onTicketCreated }) => {
         failure_classification: ''
     });
 
+    const [emailRecipient, setEmailRecipient] = useState('');
+    const [departments, setDepartments] = useState([]);
+
+    React.useEffect(() => {
+        api.get('/admin/settings')
+            .then(res => setEmailRecipient(res.data?.email_recipient || ''))
+            .catch(() => setEmailRecipient(''));
+
+        // Catálogo de departamentos (código/etiqueta de ID + nombre)
+        api.get('/departments')
+            .then(res => setDepartments(res.data || []))
+            .catch(() => setDepartments([]));
+    }, []);
+
+    // Al elegir un departamento del catálogo, se guarda tanto el nombre
+    // como su etiqueta de ID (código) para el ticket
+    const handleDepartmentChange = (e) => {
+        const selectedId = e.target.value;
+        const dept = departments.find(d => String(d.id) === selectedId);
+        setFormData({
+            ...formData,
+            user_department: dept ? dept.name : '',
+            user_department_id: dept ? dept.code : ''
+        });
+    };
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
+    };
+
+    const handleGenerateByEmail = () => {
+        if (!formData.user_name || !formData.user_department || !formData.computer_model || !formData.failure_description) {
+            toast.error('❌ Complete al menos nombre, departamento, equipo y descripción del fallo antes de generar el correo');
+            return;
+        }
+        const jsonData = JSON.stringify(formData);
+        const encoded = btoa(unescape(encodeURIComponent(jsonData)));
+        const body =
+            `Solicitud de ticket de soporte generada sin conexión.\n\n` +
+            `El Administrador debe copiar TODO este correo (incluyendo las líneas [[TICKETFAST-DATA]]) ` +
+            `y pegarlo en Ticketfast > Importar Ticket.\n\n` +
+            `[[TICKETFAST-DATA]]\n${encoded}\n[[/TICKETFAST-DATA]]`;
+        const subject = `Ticket de soporte - ${formData.user_name} - ${formData.computer_model}`;
+        const mailto = `mailto:${emailRecipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailto;
+        toast.info('📧 Se abrió su cliente de correo con los datos del ticket. Revise y envíe el correo.');
     };
 
     const handleSubmit = async (e) => {
@@ -32,6 +77,7 @@ const TicketForm = ({ onTicketCreated }) => {
             setFormData({
                 user_name: '',
                 user_department: '',
+                user_department_id: '',
                 user_phone: '',
                 user_email: '',
                 computer_model: '',
@@ -71,14 +117,25 @@ const TicketForm = ({ onTicketCreated }) => {
                         placeholder="Ingrese su nombre"
                         required
                     />
-                    <GlassInput
-                        label="Departamento"
-                        name="user_department"
-                        value={formData.user_department}
-                        onChange={handleChange}
-                        placeholder="Departamento"
-                        required
-                    />
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Departamento
+                        </label>
+                        <select
+                            name="user_department_select"
+                            value={departments.find(d => d.code === formData.user_department_id)?.id || ''}
+                            onChange={handleDepartmentChange}
+                            className="input-premium"
+                            required
+                        >
+                            <option value="">Seleccionar departamento...</option>
+                            {departments.map(d => (
+                                <option key={d.id} value={d.id}>
+                                    [{d.code}] {d.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <GlassInput
                         label="Teléfono"
                         name="user_phone"
@@ -152,9 +209,23 @@ const TicketForm = ({ onTicketCreated }) => {
                     />
                 </div>
 
+                <div style={{ padding: '10px 14px', background: '#e3f2fd', borderRadius: '8px', borderLeft: '4px solid #1976D2', marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', color: '#555', margin: 0 }}>
+                        ℹ️ Si esta PC <strong>no está conectada</strong> al servidor de Ticketfast, use el botón
+                        "📧 Generar por correo" para enviar la solicitud por email en lugar de "Enviar Ticket".
+                    </p>
+                </div>
+
                 <div className="flex justify-center gap-4 flex-wrap">
                     <button type="submit" className="btn-premium">
                         🚀 Enviar Ticket
+                    </button>
+                    <button
+                        type="button"
+                        className="btn-premium btn-premium-secondary"
+                        onClick={handleGenerateByEmail}
+                    >
+                        📧 Generar por correo
                     </button>
                     <button 
                         type="button" 
@@ -162,6 +233,7 @@ const TicketForm = ({ onTicketCreated }) => {
                         onClick={() => setFormData({
                             user_name: '',
                             user_department: '',
+                            user_department_id: '',
                             user_phone: '',
                             user_email: '',
                             computer_model: '',

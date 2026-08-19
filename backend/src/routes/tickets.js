@@ -547,6 +547,127 @@ router.delete("/:id/permanent", async (req, res) => {
     }
 });
 
+// ============================================
+// BOLETA DE MANTENIMIENTO - Guardar boleta completa (técnico)
+// ============================================
+router.put("/:id/complete-boleta", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const b = req.body;
+
+        const existing = await query("SELECT * FROM tickets WHERE id = ?", [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: "Ticket no encontrado" });
+        }
+
+        await run(
+            `UPDATE tickets SET
+                maintenance_type = ?,
+                initial_equipment_status = ?,
+                initial_equipment_status_other = ?,
+                inspection_json = ?,
+                accessories_json = ?,
+                work_preventive_json = ?,
+                work_corrective_json = ?,
+                work_other = ?,
+                findings = ?,
+                replaced_parts_json = ?,
+                final_observations = ?,
+                final_equipment_status = ?,
+                technician_signature_name = ?,
+                technician_signature_date = ?,
+                receiver_signature_name = ?,
+                receiver_signature_date = ?,
+                boleta_completed = 1,
+                status = 'completed',
+                progress_percentage = 100,
+                closed_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?`,
+            [
+                b.maintenance_type || "",
+                b.initial_equipment_status || "",
+                b.initial_equipment_status_other || "",
+                JSON.stringify(b.inspection || {}),
+                JSON.stringify(b.accessories || {}),
+                JSON.stringify(b.work_preventive || []),
+                JSON.stringify(b.work_corrective || []),
+                b.work_other || "",
+                b.findings || "",
+                JSON.stringify(b.replaced_parts || []),
+                b.final_observations || "",
+                b.final_equipment_status || "",
+                b.technician_signature_name || "",
+                b.technician_signature_date || new Date().toISOString().slice(0, 10),
+                b.receiver_signature_name || "",
+                b.receiver_signature_date || "",
+                id
+            ]
+        );
+
+        const updatedTicket = await query("SELECT * FROM tickets WHERE id = ?", [id]);
+        res.json(updatedTicket[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// IMPORTAR TICKET - Flujo de captura sin conexión
+// El solicitante genera un bloque de texto (ver TicketForm "Generar por correo")
+// y el administrador lo pega aquí para crear el ticket automáticamente.
+// ============================================
+router.post("/import", async (req, res) => {
+    try {
+        const { rawText } = req.body;
+        if (!rawText || !rawText.includes("[[TICKETFAST-DATA]]")) {
+            return res.status(400).json({ error: "El texto pegado no contiene un bloque de datos válido de Ticketfast" });
+        }
+
+        const match = rawText.match(/\[\[TICKETFAST-DATA\]\]([\s\S]*?)\[\[\/TICKETFAST-DATA\]\]/);
+        if (!match) {
+            return res.status(400).json({ error: "No se pudo leer el bloque de datos" });
+        }
+
+        let data;
+        try {
+            data = JSON.parse(Buffer.from(match[1].trim(), "base64").toString("utf-8"));
+        } catch (e) {
+            return res.status(400).json({ error: "El bloque de datos está dañado o incompleto" });
+        }
+
+        const ticketNumber = generateTicketNumber();
+
+        const result = await run(
+            `INSERT INTO tickets (
+                ticket_number, user_name, user_department, user_department_id,
+                user_phone, user_email, computer_model, computer_serial,
+                computer_os, failure_description, failure_classification,
+                status, imported_from_email
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            [
+                ticketNumber,
+                data.user_name || "",
+                data.user_department || "",
+                data.user_department_id || "",
+                data.user_phone || "",
+                data.user_email || "",
+                data.computer_model || "",
+                data.computer_serial || "",
+                data.computer_os || "",
+                data.failure_description || "",
+                data.failure_classification || "",
+                "pending"
+            ]
+        );
+
+        const newTicket = await query("SELECT * FROM tickets WHERE id = ?", [result.id]);
+        res.status(201).json(newTicket[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;
 
 

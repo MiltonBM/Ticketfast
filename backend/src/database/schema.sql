@@ -17,7 +17,23 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
+-- Tabla de Departamentos (etiqueta de ID de Dpto requerida por la consigna)
+CREATE TABLE IF NOT EXISTS departments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,      -- Etiqueta / ID corto del departamento (ej: "CONT-01")
+    name TEXT NOT NULL,             -- Nombre del departamento
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Insertar departamentos por defecto (ajustar a los reales del colegio)
+INSERT OR IGNORE INTO departments (code, name) VALUES
+    ('DIR-01', 'Dirección'),
+    ('SEC-01', 'Secretaría'),
+    ('CONT-01', 'Contabilidad'),
+    ('INFO-01', 'Informática'),
+    ('DOC-01', 'Docencia'),
+    ('MANT-01', 'Mantenimiento');
+    
 -- Tabla de Laboratorios
 CREATE TABLE IF NOT EXISTS laboratories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -156,7 +172,6 @@ CREATE TABLE IF NOT EXISTS technicians (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insertar técnicos por defecto
 INSERT OR IGNORE INTO technicians (name, specialty) VALUES 
     ('Carlos Rodríguez', 'Hardware'),
     ('María Fernández', 'Software'),
@@ -188,23 +203,6 @@ ALTER TABLE tickets ADD COLUMN assigned_technician_id INTEGER;
 ALTER TABLE tickets ADD COLUMN technician_comments TEXT;
 ALTER TABLE tickets ADD COLUMN progress_percentage INTEGER DEFAULT 0;
 
--- Tabla de técnicos (ya existe, pero actualizamos)
-CREATE TABLE IF NOT EXISTS technicians (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER UNIQUE,
-    name TEXT NOT NULL,
-    specialty TEXT,
-    is_active INTEGER DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Insertar algunos técnicos de ejemplo
-INSERT OR IGNORE INTO technicians (name, specialty) VALUES 
-    ('Carlos Rodríguez', 'Hardware'),
-    ('María Fernández', 'Software'),
-    ('José Martínez', 'Redes'),
-    ('Ana González', 'Soporte General');
 -- Actualizar tabla de técnicos para vincular con usuarios
 CREATE TABLE IF NOT EXISTS technician_profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -220,25 +218,19 @@ CREATE TABLE IF NOT EXISTS technician_profiles (
 
 -- Agregar columna technician_id a tickets
 ALTER TABLE tickets ADD COLUMN technician_id INTEGER;
-ALTER TABLE tickets ADD COLUMN technician_name TEXT;
 
 -- Insertar técnicos de ejemplo (vinculados a usuarios existentes)
 INSERT OR IGNORE INTO technician_profiles (user_id, specialty, experience_years) 
 SELECT id, 'Soporte General', 2 FROM users WHERE username = 'admin' AND role = 'admin';
--- Agregar estado 'archived' a tickets
--- Los valores posibles son: pending, assigned, in_progress, completed, cancelled, archived
--- Ya existe la columna status, solo actualizamos el comentario
 
--- Nota: Para habilitar el estado 'archived', solo se necesita que exista en la lógica
--- No se requiere cambio en la tabla
-
--- Crear tabla de auditoría para trazabilidad (opcional)
+-- Crear tabla de auditoría para trazabilidad
 CREATE TABLE IF NOT EXISTS ticket_audit (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ticket_id INTEGER NOT NULL,
     action TEXT NOT NULL,
     user_id INTEGER,
     user_name TEXT,
+    user_role TEXT,
     details TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ticket_id) REFERENCES tickets(id)
@@ -251,21 +243,33 @@ ALTER TABLE tickets ADD COLUMN deleted_by_user INTEGER DEFAULT 0;
 ALTER TABLE tickets ADD COLUMN deleted_by_technician INTEGER DEFAULT 0;
 ALTER TABLE tickets ADD COLUMN deleted_by_admin INTEGER DEFAULT 0;
 
--- Tabla de auditoría para trazabilidad
-CREATE TABLE IF NOT EXISTS ticket_audit (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ticket_id INTEGER NOT NULL,
-    action TEXT NOT NULL,
-    user_id INTEGER,
-    user_name TEXT,
-    user_role TEXT,
-    details TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(id)
-);
 -- Agregar campo para guardar el estado anterior
 ALTER TABLE tickets ADD COLUMN previous_status TEXT DEFAULT 'pending';
 
 -- Agregar campos de periféricos (Teclado y Mouse) al expediente de hardware
 ALTER TABLE hardware ADD COLUMN keyboard_type TEXT;
 ALTER TABLE hardware ADD COLUMN mouse_type TEXT;
+
+-- ============================================
+-- BOLETA DE MANTENIMIENTO 
+-- ============================================
+ALTER TABLE tickets ADD COLUMN maintenance_type TEXT;
+ALTER TABLE tickets ADD COLUMN initial_equipment_status TEXT;
+ALTER TABLE tickets ADD COLUMN initial_equipment_status_other TEXT;
+ALTER TABLE tickets ADD COLUMN inspection_json TEXT;
+ALTER TABLE tickets ADD COLUMN accessories_json TEXT;
+ALTER TABLE tickets ADD COLUMN work_preventive_json TEXT;
+ALTER TABLE tickets ADD COLUMN work_corrective_json TEXT;
+ALTER TABLE tickets ADD COLUMN work_other TEXT;
+ALTER TABLE tickets ADD COLUMN findings TEXT;
+ALTER TABLE tickets ADD COLUMN replaced_parts_json TEXT;
+ALTER TABLE tickets ADD COLUMN final_observations TEXT;
+ALTER TABLE tickets ADD COLUMN final_equipment_status TEXT;
+ALTER TABLE tickets ADD COLUMN technician_signature_name TEXT;
+ALTER TABLE tickets ADD COLUMN technician_signature_date TEXT;
+ALTER TABLE tickets ADD COLUMN receiver_signature_name TEXT;
+ALTER TABLE tickets ADD COLUMN receiver_signature_date TEXT;
+ALTER TABLE tickets ADD COLUMN boleta_completed INTEGER DEFAULT 0;
+
+-- Tickets importados desde un correo (flujo de captura sin conexión)
+ALTER TABLE tickets ADD COLUMN imported_from_email INTEGER DEFAULT 0;

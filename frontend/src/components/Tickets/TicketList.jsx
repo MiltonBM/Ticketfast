@@ -2,6 +2,7 @@
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import BoletaPrint from './BoletaPrint';
 
 const TicketList = ({ onStatsUpdate, userRole }) => {
     const [tickets, setTickets] = useState([]);
@@ -12,6 +13,9 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedTechnician, setSelectedTechnician] = useState('');
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importText, setImportText] = useState('');
+    const [showBoletaTicket, setShowBoletaTicket] = useState(null);
 
     const COLORS = ['#FFC107', '#6C63FF', '#FF6584', '#2ECC71', '#E74C3C'];
     
@@ -128,6 +132,26 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
 
     const handlePrint = () => {
         window.print();
+    };
+
+    // ============================================
+    // IMPORTAR TICKET desde el bloque de texto generado por
+    // TicketForm > "Generar por correo" (captura sin conexión)
+    // ============================================
+    const handleImportTicket = async () => {
+        if (!importText.trim()) {
+            toast.error('❌ Pegue el contenido del correo antes de importar');
+            return;
+        }
+        try {
+            const response = await api.post('/tickets/import', { rawText: importText });
+            toast.success(`✅ Ticket #${response.data.ticket_number} importado correctamente`);
+            setImportText('');
+            setShowImportModal(false);
+            loadTickets();
+        } catch (error) {
+            toast.error(error.response?.data?.error || '❌ No se pudo importar el ticket. Verifique que copió el correo completo.');
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -271,6 +295,9 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button onClick={handleExport} className="btn-premium btn-premium-secondary btn-sm">📥 Exportar</button>
                         <button onClick={handlePrint} className="btn-premium btn-premium-success btn-sm">🖨️ Imprimir</button>
+                        {isAdmin && (
+                            <button onClick={() => setShowImportModal(true)} className="btn-premium btn-premium-secondary btn-sm">📧 Importar Ticket</button>
+                        )}
                         <button onClick={loadTickets} className="btn-premium btn-sm">🔄 Actualizar</button>
                     </div>
                 </div>
@@ -344,7 +371,7 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
                                 
                                 <div style={{ marginTop: '8px', fontSize: '14px', color: '#555' }}>
                                     <div><strong>👤 Usuario:</strong> {ticket.user_name}</div>
-                                    <div><strong>🏢 Departamento:</strong> {ticket.user_department}</div>
+                                    <div><strong>🏢 Departamento:</strong> {ticket.user_department} {ticket.user_department_id ? `(${ticket.user_department_id})` : ''}</div>
                                     <div><strong>💻 Equipo:</strong> {ticket.computer_model}</div>
                                     {ticket.user_phone && <div><strong>📞 Teléfono:</strong> {ticket.user_phone}</div>}
                                     {ticket.user_email && <div><strong>📧 Email:</strong> {ticket.user_email}</div>}
@@ -378,6 +405,14 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
                                         👨‍🔧 Asignar Técnico
                                     </button>
                                     <button className="btn-premium btn-sm">✏️ Editar</button>
+                                    {ticket.boleta_completed === 1 && (
+                                        <button
+                                            className="btn-premium btn-premium-success btn-sm"
+                                            onClick={() => setShowBoletaTicket(ticket)}
+                                        >
+                                            📄 Ver Boleta
+                                        </button>
+                                    )}
                                     {isAdmin ? (
                                         <button 
                                             onClick={() => handleDelete(ticket.id)} 
@@ -501,6 +536,75 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
                                 💾 Asignar
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Importar Ticket (captura sin conexión) */}
+            {showImportModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: '20px'
+                }} onClick={() => setShowImportModal(false)}>
+                    <div
+                        className="card-premium"
+                        style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflow: 'auto', padding: '32px' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1B2A4A', marginBottom: '12px', borderBottom: '3px solid #D4A843', paddingBottom: '12px' }}>
+                            📧 Importar Ticket desde correo
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>
+                            Pegue aquí el contenido completo del correo que recibió (generado desde "Generar por correo"
+                            en el formulario de solicitud). Debe incluir las líneas [[TICKETFAST-DATA]].
+                        </p>
+                        <textarea
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            placeholder="Pegue aquí el correo completo..."
+                            rows="8"
+                            className="input-premium"
+                            style={{ width: '100%', fontFamily: 'monospace', fontSize: '12px' }}
+                        />
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                            <button
+                                type="button"
+                                className="btn-premium btn-premium-warning"
+                                onClick={() => { setShowImportModal(false); setImportText(''); }}
+                                style={{ padding: '10px 24px' }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-premium"
+                                onClick={handleImportTicket}
+                                style={{ padding: '10px 24px' }}
+                            >
+                                📥 Importar Ticket
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Ver/Imprimir Boleta */}
+            {showBoletaTicket && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: '20px', overflow: 'auto'
+                }} onClick={() => setShowBoletaTicket(null)} className="no-print-backdrop">
+                    <div
+                        style={{ maxWidth: '900px', width: '100%', maxHeight: '92vh', overflow: 'auto' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '8px' }} className="no-print">
+                            <button className="btn-premium btn-premium-success btn-sm" onClick={() => window.print()}>🖨️ Imprimir</button>
+                            <button className="btn-premium btn-premium-warning btn-sm" onClick={() => setShowBoletaTicket(null)}>✖ Cerrar</button>
+                        </div>
+                        <BoletaPrint ticket={showBoletaTicket} />
                     </div>
                 </div>
             )}

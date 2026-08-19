@@ -6,6 +6,7 @@ import hardwareRouter from "./routes/hardware.js";
 import adminRouter from "./routes/admin.js";
 import usersRouter from "./routes/users.js";
 import techniciansRouter from "./routes/technicians.js";
+import departmentsRouter from "./routes/departments.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/hardware", hardwareRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/technicians", techniciansRouter);
+app.use("/api/departments", departmentsRouter);
 
 app.listen(port, () => {
     console.log("Servidor backend corriendo en http://localhost:" + port);
