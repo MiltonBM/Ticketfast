@@ -3,6 +3,7 @@ import api from '../../services/api';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import BoletaPrint from './BoletaPrint';
+import { parseServerDate } from '../../utils/dateUtils';
 
 const TicketList = ({ onStatsUpdate, userRole }) => {
     const [tickets, setTickets] = useState([]);
@@ -115,7 +116,7 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
         const headers = 'Ticket,Usuario,Departamento,Equipo,Clasificacion,Estado,Tecnico,Fecha';
         const rows = tickets.map(t => {
             const statusMap = { pending: 'Pendiente', assigned: 'Asignado', in_progress: 'En Progreso', completed: 'Completado', cancelled: 'Cancelado' };
-            return `${t.ticket_number},${t.user_name},${t.user_department},${t.computer_model},${t.failure_classification || 'N/A'},${statusMap[t.status] || t.status},${t.technician_name || 'Sin asignar'},${new Date(t.created_at).toLocaleString()}`;
+            return `${t.ticket_number},${t.user_name},${t.user_department},${t.computer_model},${t.failure_classification || 'N/A'},${statusMap[t.status] || t.status},${t.technician_name || 'Sin asignar'},${parseServerDate(t.created_at).toLocaleString()}`;
         });
         const csv = headers + '\n' + rows.join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -365,7 +366,7 @@ const TicketList = ({ onStatsUpdate, userRole }) => {
                                         )}
                                     </div>
                                     <span style={{ fontSize: '12px', color: '#999' }}>
-                                        📅 {new Date(ticket.created_at).toLocaleString()}
+                                        📅 {parseServerDate(ticket.created_at).toLocaleString()}
                                     </span>
                                 </div>
                                 

@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
+import { parseServerDate } from '../utils/dateUtils';
 
 const UserDashboard = ({ user, onLogout }) => {
     const [tickets, setTickets] = useState([]);
@@ -630,7 +631,7 @@ const UserDashboard = ({ user, onLogout }) => {
                                         )}
                                     </div>
                                     <span style={{ fontSize: '12px', color: '#999' }}>
-                                        📅 {new Date(ticket.created_at).toLocaleString()}
+                                        📅 {parseServerDate(ticket.created_at).toLocaleString()}
                                     </span>
                                 </div>
                                 
