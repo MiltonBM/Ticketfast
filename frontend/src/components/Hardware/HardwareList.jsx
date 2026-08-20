@@ -267,7 +267,8 @@ const HardwareList = ({ onStatsUpdate }) => {
                             <div style={{ 
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
-                                alignItems: 'flex-start',                                borderBottom: '2px solid #f0f0f0',
+                                alignItems: 'flex-start',
+                                borderBottom: '2px solid #f0f0f0',
                                 paddingBottom: '10px'
                             }}>
                                 <div>
@@ -347,13 +348,177 @@ const HardwareList = ({ onStatsUpdate }) => {
 
                                 {(item.keyboard_type || item.mouse_type) && (
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
-                                            Periféricos:
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>                                            Periféricos:
                                         </span>
                                         <span style={{ fontSize: '14px', color: '#333' }}>
                                             {item.keyboard_type ? `Teclado: ${item.keyboard_type}` : ''}
                                             {item.keyboard_type && item.mouse_type ? ' · ' : ''}
                                             {item.mouse_type ? `Mouse: ${item.mouse_type}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {(item.screen_size || item.screen_resolution) && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Pantalla:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.screen_size || ''} {item.screen_resolution || ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.monitor_size && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Tamaño:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.monitor_size} {item.monitor_resolution ? `· ${item.monitor_resolution}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.monitor_refresh_rate && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Panel:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.monitor_panel_type || ''} {item.monitor_refresh_rate ? `· ${item.monitor_refresh_rate}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.monitor_ports && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Puertos:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.monitor_ports} {item.monitor_stand_type ? `· Soporte: ${item.monitor_stand_type}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.printer_type && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Tipo:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.printer_type} {item.printer_technology ? `· ${item.printer_technology}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.printer_speed_pages && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Velocidad:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.printer_speed_pages} {item.printer_max_resolution ? `· ${item.printer_max_resolution}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.printer_paper_size && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Papel:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.printer_paper_size} {item.printer_connectivity ? `· ${item.printer_connectivity}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.printer_toner_type && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Tóner:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.printer_toner_type}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.projector_lumens && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Lúmenes:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.projector_lumens} {item.projector_resolution ? `· ${item.projector_resolution}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.projector_contrast && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Contraste:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.projector_contrast} {item.projector_lamp_hours ? `· Lámpara: ${item.projector_lamp_hours}h` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.projector_inputs && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Entradas:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.projector_inputs}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.network_ports && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Puertos:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.network_ports} {item.network_speed ? `· ${item.network_speed}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.network_managed && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Gestión:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.network_managed} {item.network_poe ? `· PoE: ${item.network_poe}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.network_wifi_standard && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            WiFi:
+                                        </span>
+                                        <span style={{ fontSize: '14px', color: '#333' }}>
+                                            {item.network_wifi_standard} {item.network_frequency ? `· ${item.network_frequency}` : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {item.observations && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#555', minWidth: '70px' }}>
+                                            Obs.:
+                                        </span>
+                                        <span style={{ fontSize: '13px', color: '#666', fontStyle: 'italic' }}>
+                                            {item.observations}
                                         </span>
                                     </div>
                                 )}
@@ -372,8 +537,7 @@ const HardwareList = ({ onStatsUpdate }) => {
                                     <div>
                                         <span style={{ fontWeight: '600', fontSize: '12px', color: '#888' }}>
                                             ASIGNADO A:
-                                        </span>
-                                        <span style={{ 
+                                        </span>                                        <span style={{ 
                                             fontSize: '13px', 
                                             color: '#1B2A4A', 
                                             fontWeight: '600',
@@ -396,7 +560,8 @@ const HardwareList = ({ onStatsUpdate }) => {
                                             style={{ padding: '4px 12px', fontSize: '11px' }}
                                         >
                                             🗑️
-                                        </button>                                    </div>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
