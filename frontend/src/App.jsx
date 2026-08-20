@@ -292,7 +292,7 @@ function App() {
                 {activeTab === 'kanban' && <KanbanBoard onStatsUpdate={() => {}} userRole={user.role} />}
                 {activeTab === 'tickets' && <TicketList onStatsUpdate={() => {}} userRole={user.role} />}
                 {activeTab === 'usuarios' && <UserManagement />}
-                {activeTab === 'hardware' && <HardwareList onStatsUpdate={() => {}} />}
+                {activeTab === 'hardware' && <HardwareList onStatsUpdate={() => {}} userRole={user.role} />}
                 {activeTab === 'nuevo-hardware' && <HardwareForm onHardwareCreated={() => setActiveTab('hardware')} userRole={user.role} />}
             </div>
 
